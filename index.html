@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DIGGER (1983) — playable in the browser</title>
+<meta name="description" content="A faithful browser port of DIGGER by Windmill Software (1983), with a teardown of how the original works.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site">
+  <h1>DIGGER</h1>
+  <p>Windmill Software, 1983 &middot; ported from the original C and 8088 assembler sources to plain browser JavaScript</p>
+</header>
+
+<main>
+
+<div id="screen-wrap">
+  <canvas id="screen" width="320" height="200" tabindex="0" aria-label="DIGGER game screen"></canvas>
+  <div id="overlay" role="button" tabindex="0" aria-label="Start DIGGER">
+    <div class="credit">
+      <strong>D I G G E R</strong><br><br>
+      Copyright (c) 1983<br>
+      Windmill Software Inc.<br><br>
+      DIGGER is available for all PC,<br>
+      XT, AT and compatibles.<br><br>
+      Thank You for your support.
+    </div>
+    <div class="press">Click or press any key ...</div>
+  </div>
+</div>
+
+<div id="controls">
+  <span id="status">INSERT DISK</span>
+  <button id="btn-music" type="button" aria-pressed="true" title="Same as F7">Music</button>
+  <button id="btn-sound" type="button" aria-pressed="true" title="Same as F9">Sound</button>
+  <label>Volume <input id="volume" type="range" min="0" max="100" value="60"></label>
+  <label>Speed
+    <select id="speed">
+      <option value="0.5">0.5×</option>
+      <option value="0.75">0.75×</option>
+      <option value="1" selected>1× (PC/XT)</option>
+      <option value="1.25">1.25×</option>
+      <option value="1.5">1.5×</option>
+      <option value="2">2×</option>
+    </select>
+  </label>
+  <label title="Takes effect on the next new game">Start at level
+    <select id="start-level">
+      <option>1</option><option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option><option>8</option>
+      <option>9</option><option>10</option>
+    </select>
+  </label>
+  <button id="btn-full" type="button">Full screen</button>
+</div>
+
+<!-- =================================================================== -->
+<section id="how-to-play">
+<h2>How to play</h2>
+<p class="lead">You drive the <strong>Digger Mobile</strong> through an underground mine. Tunnel through the dirt,
+scoop up every emerald, and keep away from the Nobbins and Hobbins that pour out of the top-right corner.
+Gold sacks sit in the dirt above you: dig out from under one and it wobbles, then falls. It squashes anything below it,
+and if it falls more than one row it bursts open into gold you can collect.</p>
+
+<p>You clear a round by collecting all the emeralds <em>or</em> by getting rid of every monster in the round.
+Once the last monster has come out, a <strong>cherry</strong> appears where they emerged. Eat it and the screen changes
+colour, the monsters run away from you, and for a short time you can eat them for big points.</p>
+
+<div class="two-col">
+<div>
+<h3>Keys</h3>
+<table>
+  <tr><td><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></td><td>Drive the Digger (the numeric keypad works too)</td></tr>
+  <tr><td><kbd>F1</kbd> &nbsp;or <kbd>Z</kbd> / <kbd>Enter</kbd></td><td>Throw a fireball in the direction you face</td></tr>
+  <tr><td><kbd>Space</kbd></td><td>Pause; any key resumes</td></tr>
+  <tr><td><kbd>F7</kbd></td><td>Background music on/off</td></tr>
+  <tr><td><kbd>F9</kbd></td><td>All sound on/off</td></tr>
+  <tr><td><kbd>Esc</kbd></td><td>On the title screen: toggle 1 or 2 players</td></tr>
+  <tr><td>any other key</td><td>On the title screen: start the game</td></tr>
+</table>
+<p>Your browser may grab <kbd>F1</kbd> for its own help page, so <kbd>Z</kbd> and <kbd>Enter</kbd> also fire.
+The page only takes the keys while the game screen is mostly in view, so you can still scroll down and read.</p>
+</div>
+
+<div>
+<h3>Scoring</h3>
+<table>
+  <tr><td>Nobbin or Hobbin (fireball or falling gold)</td><td class="num">250</td></tr>
+  <tr><td>Emerald</td><td class="num">25</td></tr>
+  <tr><td>Gold from a burst sack</td><td class="num">500</td></tr>
+  <tr><td>Eight emeralds in a row</td><td class="num">+250</td></tr>
+  <tr><td>Cherry</td><td class="num">1000</td></tr>
+  <tr><td>Monsters eaten in bonus mode</td><td class="num">200, 400, 800…</td></tr>
+</table>
+<p>You earn an extra life every <strong>20,000</strong> points, up to five lives. High scores
+are saved in your browser, where the original wrote them to its floppy disk.</p>
+</div>
+</div>
+
+<h3>Tips from the original instructions</h3>
+<blockquote class="note">
+“During normal play, you destroy Nobbins &amp; Hobbins with your fireball or by pushing the gold sacks down a
+mine shaft. Don't forget to scoop up the gold when the sack breaks. After all the Nobbins &amp; Hobbins have
+emerged, cherries appear. Scooping up the cherries begins a bonus round.”
+<br><small>— the in-game instructions screen from the shareware build (<code>TZ.C</code>)</small>
+</blockquote>
+<ul>
+  <li>You can push a gold sack sideways by driving into it, and push a whole row of sacks along together.</li>
+  <li>A sack falling down a shaft takes out every monster in its path, at 250 each.</li>
+  <li>The Digger's red cab disappears after you throw a fireball. When it comes back, the fireball has recharged.</li>
+  <li>Monsters that keep getting blocked lose patience and become <strong>Hobbins</strong>, which dig straight towards you.</li>
+  <li>Eating emeralds one after another, without a pause, plays a rising scale. The eighth note pays the 250 bonus.</li>
+</ul>
+</section>
+
+<!-- =================================================================== -->
+<section id="toc">
+<h2>How DIGGER works</h2>
+<p>To port the game I had to read every line of the original, so here is what I found. Everything below
+comes from the 1983 sources (<code>TA.C</code>–<code>TZ.C</code>, <code>GRAPHLIB.ASM</code>,
+<code>KEYBOARD.ASM</code>, the <code>.SPR</code> sprite files and the <code>.CHR</code> font).
+The sprites, maps and screenshots are drawn from the original data by this port's own engine.</p>
+<ol>
+  <li><a href="#arch">Program structure</a></li>
+  <li><a href="#display">The CGA display</a></li>
+  <li><a href="#sprites">Sprites</a></li>
+  <li><a href="#engine">The sprite engine and collisions</a></li>
+  <li><a href="#grid">The playfield grid</a></li>
+  <li><a href="#levels">Level structure</a></li>
+  <li><a href="#tunnels">How tunnels are remembered</a></li>
+  <li><a href="#ai">Nobbins and Hobbins: the enemy AI</a></li>
+  <li><a href="#difficulty">Difficulty table</a></li>
+  <li><a href="#bags">Gold sacks</a></li>
+  <li><a href="#digger">The Digger and its fireball</a></li>
+  <li><a href="#bonus">Bonus mode</a></li>
+  <li><a href="#scores">Scores, lives and two players</a></li>
+  <li><a href="#timing">Keeping a constant speed</a></li>
+  <li><a href="#sound">Two voices from one beeper</a></li>
+  <li><a href="#title">The title screen</a></li>
+  <li><a href="#quirks">Quirks and curiosities</a></li>
+  <li><a href="#port">About this port</a></li>
+</ol>
+</section>
+
+<section id="arch">
+<h2>1. Program structure</h2>
+<p>The game is written in Lattice C with a small library of 8088 assembler for graphics, keyboard and copy protection.
+Each source file is one "task", identified by a letter:</p>
+<table>
+  <tr><th>File</th><th>Task</th></tr>
+  <tr><td><code>TZ.C</code></td><td>Main program: title screen and demo, game loop, levels, players, pause</td></tr>
+  <tr><td><code>TA.C</code></td><td>Nobbins and Hobbins: spawning, AI, dying</td></tr>
+  <tr><td><code>TB.C</code></td><td>Gold sacks: loosening, wobbling, falling, pushing, bursting</td></tr>
+  <tr><td><code>TC.C</code></td><td>The Digger: movement, death sequence, fireball, bonus cherry</td></tr>
+  <tr><td><code>TD.C</code></td><td>Emeralds: placement and eating</td></tr>
+  <tr><td><code>TE.C</code></td><td>Joystick/keyboard reading</td></tr>
+  <tr><td><code>TF.C</code></td><td>Scores, extra lives, high-score table and initials entry</td></tr>
+  <tr><td><code>TG.C</code></td><td>Background: dirt patterns and the tunnel bitmap</td></tr>
+  <tr><td><code>TH.C</code></td><td>Sound: the timer interrupt, music and every sound effect</td></tr>
+  <tr><td><code>TX.C</code></td><td>Data: the eight level maps and a 256-entry random table</td></tr>
+  <tr><td><code>IMAGE.C</code>, <code>IMAGE_B.C</code></td><td>Animation: picking sprite frames for each object</td></tr>
+  <tr><td><code>GRAPHLIB.ASM</code></td><td>The sprite engine (save-under, masking, collision detection)</td></tr>
+</table>
+<p>Each frame, the main loop calls <code>task_c()</code> (Digger), then <code>task_a()</code> (monsters), then
+<code>task_b()</code> (sacks). It then waits out the rest of the frame and checks for pause and end of round.
+Sound runs separately, inside a reprogrammed timer interrupt.</p>
+</section>
+
+<section id="display">
+<h2>2. The CGA display</h2>
+<p>DIGGER runs in CGA mode 4: 320×200 pixels, 4 colours, 2 bits per pixel, four pixels per byte with the leftmost in the high bits.
+Video memory is <em>interlaced</em>: even lines start at <code>B800:0000</code> and odd lines at <code>B800:2000</code>,
+80 bytes per line. Every routine in <code>GRAPHLIB.ASM</code> steps through those two banks by hand.</p>
+<div class="two-col">
+<div>
+  <h3>Palette 0: normal play</h3>
+  <div class="swatches">
+    <span class="swatch"><i style="background:#000"></i>0 black</span>
+    <span class="swatch"><i style="background:#00aa00"></i>1 green</span>
+    <span class="swatch"><i style="background:#aa0000"></i>2 red</span>
+    <span class="swatch"><i style="background:#aa5500"></i>3 brown</span>
+  </div>
+</div>
+<div>
+  <h3>Palette 1: bonus mode</h3>
+  <div class="swatches">
+    <span class="swatch"><i style="background:#000"></i>0 black</span>
+    <span class="swatch"><i style="background:#00aaaa"></i>1 cyan</span>
+    <span class="swatch"><i style="background:#aa00aa"></i>2 magenta</span>
+    <span class="swatch"><i style="background:#aaaaaa"></i>3 grey</span>
+  </div>
+</div>
+</div>
+<p>Bonus mode doesn't redraw anything. It writes one bit to the CGA colour-select register (port <code>3D9h</code>) and the
+whole mine instantly changes from green/red/brown to cyan/magenta/grey:</p>
+<div class="two-col">
+  <figure><img class="pixel shot" src="img/level-1.png" alt="Level 1 in palette 0"><figcaption>Level 1, palette 0</figcaption></figure>
+  <figure><img class="pixel shot" src="img/level-1-bonus.png" alt="Level 1 in palette 1"><figcaption>The same screen memory shown with palette 1</figcaption></figure>
+</div>
+<p>Text uses its own 39-glyph font (<code>CHAR__*.CHR</code>), 3 bytes (12 px) wide. A glyph is ANDed with
+the colour repeated across the byte, so one bitmap can be drawn in any of the four colours:</p>
+<div id="font-gallery" class="gallery"></div>
+</section>
+
+<section id="sprites">
+<h2>3. Sprites</h2>
+<p>The <span id="sprite-count">77</span> sprites were drawn in a home-made editor, <code>SPGEN.BAS</code> (GW-BASIC).
+It writes each one out as a C header with a 32×32 picture in a comment, an <code>image_</code> array, an
+<code>outln_</code> (mask) array and the width and height. In the editor, colour 4 means "transparent": it becomes
+image <code>00</code> with outline <code>11</code>, so the background shows through. Most actors are 4 bytes × 15 lines
+(16×15 pixels).</p>
+<p>
+  <label>Show in
+    <select id="gallery-palette">
+      <option value="0">palette 0 (normal)</option>
+      <option value="1">palette 1 (bonus)</option>
+    </select>
+  </label>
+</p>
+<div id="sprite-gallery" class="gallery checker"></div>
+<p>The animation code in <code>IMAGE.C</code> cycles the three walking frames 0→1→2→1→0… by flipping an increment.
+There is no frame timer: each call to <code>draw_bug()</code> or <code>draw_man()</code> advances one frame.</p>
+</section>
+
+<section id="engine">
+<h2>4. The sprite engine and collisions</h2>
+<p><code>GRAPHLIB.ASM</code> manages 16 hardware-less sprites. Each one has an image, a mask, a save-under buffer,
+a position and an "active" flag. Drawing a sprite works like this:</p>
+<ol>
+  <li>Save the screen bytes underneath into the sprite's background buffer.</li>
+  <li>AND the mask into the screen, then OR the image on top.</li>
+</ol>
+<p>When a sprite moves, the engine first works out every active sprite that overlaps the old or new position.
+It repeats this recursively, so a chain of touching sprites is all collected. It erases them all in reverse order,
+restoring their saved backgrounds, then redraws them in a fixed priority order, so overlapping sprites never
+leave garbage behind. The draw order is:</p>
+<pre>table[] = { 14, 13, 7, 6, 5, 4, 3, 2, 1, 12, 11, 10, 9, 8, 15, 0 }
+            cherry, monster 13, sacks 7..1, monsters 12..8, fireball, and the Digger (0) last, on top</pre>
+<p>The sprite slots are fixed for the whole game:</p>
+<table>
+  <tr><th>Slot</th><th>Object</th><th>Collision bit</th></tr>
+  <tr><td>0</td><td>Digger</td><td><code>0x0001</code></td></tr>
+  <tr><td>1–7</td><td>Gold sacks</td><td><code>0x00FE</code></td></tr>
+  <tr><td>8–13</td><td>Nobbins / Hobbins (max 6)</td><td><code>0x3F00</code></td></tr>
+  <tr><td>14</td><td>Bonus cherry</td><td><code>0x4000</code></td></tr>
+  <tr><td>15</td><td>Fireball</td><td><code>0x8000</code></td></tr>
+</table>
+<p><code>sp_move()</code> returns a 16-bit mask of which other sprites the moved sprite now overlaps.
+The game logic uses nothing else to decide what hit what. For example, in <code>TA.C</code>:</p>
+<pre>if(bug[bug_num][BUG_TYPE]==NORMAL &amp;&amp; (colision &amp; 0x3f00) &amp;&amp; get_m_ststus() )
+	bug[bug_num][BUG_STUCK]++;</pre>
+<p>Collisions are bounding boxes only, which is why the fireball and monsters can seem to hit from a pixel or two away.
+There's one subtle detail: at x+320/y−2 a sprite lands on the same video memory as x/y (the next interlaced line
+starts 80 bytes later). So the engine also tests those "wrapped" positions, which keeps sprites near the
+right-hand edge erasing correctly.</p>
+</section>
+
+<section id="grid">
+<h2>5. The playfield grid</h2>
+<p>The mine is a <strong>15 × 10 grid</strong> of cells, each 20 pixels wide and 18 high, with its top-left at (12, 18).
+The top 18 pixel rows hold the scores and lives.</p>
+<ul>
+  <li>The Digger and the monsters move 4 px horizontally or 3 px vertically per step. That is 5 steps to cross a column and 6 to cross a row.</li>
+  <li>They can only turn when they are exactly on a cell boundary. If you press a perpendicular arrow between cells,
+      the Digger keeps going until it reaches the next boundary and then turns. This "pre-turn" makes the controls feel forgiving.</li>
+  <li>The Digger always starts at cell (7, 9), bottom centre. Monsters always come out at (14, 0), top right.</li>
+</ul>
+</section>
+
+<section id="levels">
+<h2>6. Level structure</h2>
+<p>There are eight hand-made screens. Each is a 10-row × 15-column array of characters in <code>TX.C</code>:</p>
+<table>
+  <tr><th>Char</th><th>Meaning</th></tr>
+  <tr><td><code>S</code></td><td>Solid open cell (the tunnel occupies the whole cell)</td></tr>
+  <tr><td><code>H</code></td><td>Horizontal tunnel through the cell</td></tr>
+  <tr><td><code>V</code></td><td>Vertical tunnel through the cell</td></tr>
+  <tr><td><code>C</code></td><td>Emerald (C for "coin", the name used throughout the code)</td></tr>
+  <tr><td><code>B</code></td><td>Gold sack ("money bag")</td></tr>
+  <tr><td>space</td><td>Untouched dirt</td></tr>
+</table>
+<p>The level number keeps going up, but the screen shown follows this function from <code>TZ.C</code>:</p>
+<pre>get_screen()
+{
+	int	temp;
+	temp=get_level();
+	if(temp>8)
+		temp=(temp%4)+5;	/* rotate through the last 4 screens */
+	return(temp);
+}</pre>
+<p>So the sequence is 1 2 3 4 5 6 7 8, then <strong>6 7 8 5 6 7 8 5 …</strong> forever. Note the 9th screen is screen 6, not 5.
+Difficulty is <code>min(level, 10)</code>, so from level 10 on, only the screens change. Each screen also chooses
+one of eight dirt patterns.</p>
+
+<div class="levels">
+  <figure><img class="pixel" src="img/level-1.png" alt="Level 1"><figcaption>Screen 1</figcaption><div id="map-1"></div></figure>
+  <figure><img class="pixel" src="img/level-2.png" alt="Level 2"><figcaption>Screen 2</figcaption><div id="map-2"></div></figure>
+  <figure><img class="pixel" src="img/level-3.png" alt="Level 3"><figcaption>Screen 3</figcaption><div id="map-3"></div></figure>
+  <figure><img class="pixel" src="img/level-4.png" alt="Level 4"><figcaption>Screen 4</figcaption><div id="map-4"></div></figure>
+  <figure><img class="pixel" src="img/level-5.png" alt="Level 5"><figcaption>Screen 5</figcaption><div id="map-5"></div></figure>
+  <figure><img class="pixel" src="img/level-6.png" alt="Level 6"><figcaption>Screen 6</figcaption><div id="map-6"></div></figure>
+  <figure><img class="pixel" src="img/level-7.png" alt="Level 7"><figcaption>Screen 7</figcaption><div id="map-7"></div></figure>
+  <figure><img class="pixel" src="img/level-8.png" alt="Level 8"><figcaption>Screen 8</figcaption><div id="map-8"></div></figure>
+</div>
+<p>Each player keeps their own copy of the screen state: tunnels, remaining emeralds and sack positions.
+In a two-player game the mine switches when the active player loses a life.</p>
+</section>
+
+<section id="tunnels">
+<h2>7. How tunnels are remembered</h2>
+<p>Pixels on screen are not enough for the logic to know where it can go. <code>TG.C</code> keeps one 16-bit word per cell
+recording which parts of that cell have been eaten. The Digger erases dirt with small "bite" sprites (<code>rt</code>,
+<code>lt</code>, <code>up</code>, <code>dn</code>), and every bite also sets a bit:</p>
+<div class="table-scroll">
+<table class="bits">
+  <tr><th>bit</th><td>15</td><td>14</td><td>13</td><td>12</td><td>11</td><td>10</td><td>9</td><td>8</td><td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td>2</td><td>1</td><td>0</td></tr>
+  <tr><th>use</th><td></td><td></td><td class="x">whole</td><td></td><td class="v" colspan="6">vertical bites, top → bottom</td><td></td><td class="h" colspan="5">horizontal bites, left → right</td></tr>
+</table>
+</div>
+<p>Monsters use these words to decide which directions are open (<code>back_check()</code>). A sack checks the cell beneath it
+against the mask <code>0xFDF</code> to decide whether there's a hole below. The fireball doesn't use them at all: it reads
+video memory directly and explodes on the first non-black pixel in front of it.</p>
+</section>
+
+<section id="ai">
+<h2>8. Nobbins and Hobbins: the enemy AI</h2>
+<div class="two-col">
+<div>
+<p><strong>Nobbins</strong> (the round ones) can only travel through existing tunnels.
+<strong>Hobbins</strong> (the ones with the big mouth) dig their own tunnels, eat emeralds and break open gold sacks.
+They are the same monster in two states, and every monster comes out as a Nobbin.</p>
+</div>
+<div class="gallery"><div class="group"><div class="items" id="ai-sprites"></div></div></div>
+</div>
+
+<h3>Choosing a direction</h3>
+<p>A monster only thinks when it is exactly on a cell boundary. Then, in <code>TA.C</code>:</p>
+<ol>
+  <li>It ranks the four directions by the Digger's position. The axis with the bigger distance comes first, then
+      the other axis towards the Digger, then the other axis away, and last the main axis away.</li>
+  <li>In bonus mode the order is reversed, so the monsters flee.</li>
+  <li>Going straight back the way it came is moved to last place, so a Nobbin won't dither.</li>
+  <li>On difficulties 1–5 there's a small chance (<code>rnd(5+d)==1</code>) that the 1st and 3rd choices are swapped.
+      This is the only randomness in the steering, and it disappears from difficulty 6.</li>
+  <li>It takes the first direction that <code>back_check()</code> says is open tunnel.</li>
+  <li>A Hobbin ignores all that and always takes choice 1. It just digs through.</li>
+</ol>
+<p>Changing direction costs one frame's pause, which is part of why the monsters look hesitant at corners.</p>
+
+<h3>Becoming a Hobbin, and back</h3>
+<p>Each monster has a <code>STUCK</code> counter. For a Nobbin it goes up when it bumps into another monster or is blocked.
+When it passes <code>10 − d</code> the Nobbin turns into a Hobbin. While a Hobbin digs, the same counter keeps rising,
+and once it passes <code>30 + 2d</code> the Hobbin calms down and turns back into a Nobbin.
+So on early levels Hobbins appear rarely and don't last long. On level 10 a monster that is blocked once turns into a Hobbin.</p>
+
+<h3>Speed</h3>
+<p>Each frame a Nobbin has a <code>1 in (16 − d)</code> chance of an extra step, so they speed up on later levels.
+Monsters don't get faster in any other way.</p>
+
+<h3>Spawning</h3>
+<p>A round has <code>5 + d</code> monsters in total, never more than 3, 4 or 5 on screen at once, with a delay of
+<code>45 − 2d</code> frames between arrivals. New monsters stop arriving while the Digger is dead or the bonus is running.
+If a monster is under a falling sack in the same column and heading up into it, it turns round (<code>save_bugs()</code>)
+rather than walking into the sack.</p>
+</section>
+
+<section id="difficulty">
+<h2>9. Difficulty table</h2>
+<p>Every tuning value in the game is a simple formula of the difficulty <code>d = min(level, 10)</code>.
+"Frames" are passes of the main loop, about 15 per second on the original PC.</p>
+<div class="table-scroll">
+<table id="difficulty">
+  <thead><tr>
+    <th>Level</th><th class="num">Monsters per round</th><th class="num">Max on screen</th><th class="num">Spawn gap (frames)</th>
+    <th class="num">Nobbin→Hobbin after</th><th class="num">Hobbin→Nobbin after</th><th class="num">Extra step chance</th>
+    <th class="num">Random swap</th><th class="num">Fireball recharge</th><th class="num">Bonus length</th><th class="num">Gold lasts</th>
+  </tr></thead>
+  <tbody></tbody>
+</table>
+</div>
+</section>
+
+<section id="bags">
+<h2>10. Gold sacks</h2>
+<ol>
+  <li><strong>Loose</strong>: when the cell under a sack has been dug into (the background word isn't all of
+      <code>0xFDF</code>), the sack wobbles left and right for 15 frames (<code>DROP_WAIT</code>). It won't come loose
+      while the Digger himself is in the cell below (<code>get_man_block()</code>), so it's the moment you drive away that sets it off.</li>
+  <li><strong>Falling</strong>: it falls 6 px per frame, eating its own tunnel (blanks <code>bf</code>/<code>bd</code>).
+      Anything it lands on dies: monsters score 250 each, and the Digger is flattened.</li>
+  <li><strong>Landing</strong>: a sack that fell only one row just sits down again. A sack that fell further
+      bursts in three frames into a pile of gold.</li>
+  <li><strong>Gold</strong>: worth 500 to the Digger. Hobbins can eat it too. It vanishes after <code>150 − 10d</code> frames,
+      or almost at once if there's tunnel underneath it.</li>
+</ol>
+<p>Driving into a sack from the side pushes it one step at a time. A pushed sack pushes the next one, and a sack pushed
+over a hole falls. Falling sacks also dig a hole above where they land, so the monsters can follow the new route.</p>
+</section>
+
+<section id="digger">
+<h2>11. The Digger and its fireball</h2>
+<p>The fireball (<kbd>F1</kbd>) leaves the front of the Digger and travels 8 px per frame horizontally or 7 px vertically.
+It moves through tunnels until the pixel in front of it isn't black. It kills the first monster it touches (250 points)
+and explodes in three frames. After firing you wait <code>60 + 3d</code> frames. While you wait, the Digger is drawn
+with the "no cab" sprites, which is how the game shows you're unarmed without a status bar.</p>
+<p>When the Digger dies, the game plays a short sequence:</p>
+<ul>
+  <li>Caught by a monster: the Digger flips into the overturned truck (<code>f9</code>), bounces up and down
+      (offsets −3, −5, −6, −6, −5, −3, 0 pixels), and then a gravestone grows out of it (<code>f5</code>→<code>f1</code>, two frames each).</li>
+  <li>Hit by a sack: the overturned truck rides down underneath the sack until the sack stops, then the gravestone appears.</li>
+  <li>The grave stays on screen for 60 frames with music on (to let the tune finish), or 10 with it off.</li>
+</ul>
+</section>
+
+<section id="bonus">
+<h2>12. Bonus mode</h2>
+<ul>
+  <li>When every monster for the round has appeared, the cherry (<code>z1</code>) appears at the spawn point. There's one per round.</li>
+  <li>Eating it scores 1000 and switches the palette. Bonus mode lasts <code>250 − 20d</code> frames, and the screen
+      flashes between palettes for the first 20 frames and the last 20.</li>
+  <li>Monsters flee (the reversed direction order). Each one you touch scores 200, then 400, 800, 1600…, doubling each time.</li>
+  <li>Every monster eaten during bonus mode adds one to the round's total, so another comes out later.
+      Bonus mode can't end the round by running out of monsters.</li>
+</ul>
+</section>
+
+<section id="scores">
+<h2>13. Scores, lives and two players</h2>
+<p>Each player has a "next life at" counter that starts at 20,000 and goes up by 20,000 every time it's reached.
+You can't have more than 5 lives; the four spare ones are shown with the <code>s0</code>/<code>s1</code> sprites.</p>
+<p>The top ten scores and initials were written straight to a sector on the floppy disk.
+Initials are typed letter by letter, with a time limit of about 15 seconds per letter.</p>
+</section>
+
+<section id="timing">
+<h2>14. Keeping a constant speed</h2>
+<p>The original has no frame timer. It counts how many sprites were drawn in the frame (<code>inc_plot()</code>
+is called on every move) and pads with busy-waiting to make every frame cost about the same as 8 sprite moves:</p>
+<pre>if(plot_count&lt;8) {	/* delay for constant speed */
+	for(loop=(8-plot_count)*5; loop&gt;0; loop--)
+		sleep(1);
+}
+if(plot_count&gt;8)	/* extra delay for very heavy movement times */
+	delay_bugs(plot_count-8);</pre>
+<p>A busy frame doesn't slow the game down. Instead, <code>delay_bugs()</code> makes some monsters skip their next move.
+At start-up, <code>find_speed()</code> counts how many loop iterations fit between two clock ticks. It uses the result to scale
+the pulse widths in the music (<code>time_mul</code>) so the music sounds the same on faster CPUs. The game delay itself is
+not calibrated, so on an AT the game ran noticeably faster. This port uses a fixed frame of about 66 ms, which matches a
+4.77 MHz PC. The Speed control above scales it.</p>
+</section>
+
+<section id="sound">
+<h2>15. Two voices from one beeper</h2>
+<p>The PC speaker can only be on or off, but DIGGER plays background music and sound effects at the same time,
+with what sounds like volume envelopes. <code>TH.C</code> does it like this:</p>
+<ul>
+  <li><strong>Voice 1 (effects)</strong>: channel 2 of the 8253 timer produces a square wave at
+      <code>1193182 / period</code> Hz directly into the speaker.</li>
+  <li><strong>Voice 2 (music)</strong>: the system timer (channel 0) is reprogrammed to interrupt at the music note's
+      frequency. On each interrupt the handler pulses the speaker gate on for a short time and then off. The length of
+      that pulse is the "volume": an attack/hold/decay envelope widens and narrows it on every note, which gives the
+      music its soft, plucked character.</li>
+  <li>The original BIOS timer handler is moved to <code>INT 60h</code>. The new handler adds each period to a 16-bit
+      counter and calls the old handler when it overflows, so the clock (and the floppy motor time-out) still work.
+      It also calls the C function <code>time()</code>, which runs every effect at about 72.8 Hz.</li>
+  <li>Sound effects are small state machines (<code>chk_fall</code>, <code>chk_fire</code>, <code>chk_coin</code>…) checked in a fixed
+      order every tick. The last one that wants the speaker wins, and while any effect is playing, the music voice is muted.</li>
+</ul>
+<p>Effects include the falling-sack whistle with its pitch rising as it drops, the wobble, the fireball, its explosion, the
+monster-eaten blip, the extra-life chime, the gold pickup, and the rising emerald scale. Note periods are listed in <code>NOTES.H</code>.</p>
+<p>This port emulates both voices sample by sample in a Web Audio <code>ScriptProcessorNode</code>. It produces the timer-2 square wave
+and the interrupt-driven pulse train with the original's periods and pulse widths, then applies a light low-pass filter so it
+sounds like a small speaker rather than a raw digital square.</p>
+</section>
+
+<section id="title">
+<h2>16. The title screen</h2>
+<figure>
+  <img class="pixel shot" src="img/title-bitmap.png" alt="Title bitmap">
+  <figcaption>The title bitmap decoded from <code>TITLE.C</code>: 2,332 bytes that expand to the full 16,384 bytes of video memory.</figcaption>
+</figure>
+<p>The bitmap is compressed with a simple run-length code: any byte is copied as is, except <code>0xFE</code>, which is followed
+by a count and a value (a count of 0 means 256). It is decoded straight into CGA memory, interlace and all.
+The game then draws the parade of characters with their names, using the normal sprite engine
+(Nobbin, Hobbin, Digger, Gold, Emerald, Bonus) on top. On the first player-select screen,
+<kbd>Esc</kbd> toggles between one and two players.</p>
+<p>One curiosity: the bitmap says © 1986 while the C sources and the start-up credits say 1983.</p>
+</section>
+
+<section id="quirks">
+<h2>17. Quirks and curiosities</h2>
+<ul>
+  <li><strong>Eight-character names.</strong> Lattice C only looked at the first 8 characters of an identifier.
+      The code calls <code>rst_scores()</code> but defines <code>rst_score()</code>, and calls the misspelled
+      <code>get_m_ststus()</code> next to <code>get_m_status()</code>. Both linked because the names were truncated.</li>
+  <li><strong>Unequal extra lives.</strong> Player 1's extra life is checked with <code>&gt;=</code> but player 2's with <code>&gt;</code>.
+      So player 2 needs one more point than player 1 to earn a life. Scores are always multiples of 25, so in practice it never mattered.
+      The port keeps it.</li>
+  <li><strong>The screen cycle.</strong> After level 8, <code>(level % 4) + 5</code> gives 6, 7, 8, 5. Level 9 is screen 6, not 5.</li>
+  <li><strong>A loop counter reused.</strong> After a round ends, a "let the sacks finish falling" loop shares its
+      <code>loop</code> variable with the speed-padding loop inside it. The padding counts it down to zero, so the intended
+      20 extra frames usually end after one. The port reproduces this.</li>
+  <li><strong>A custom floppy.</strong> The disk was made by its own tools (<code>CREATE</code>, <code>NEWFORM.ASM</code>).
+      Track 0 holds a two-stage boot loader. Tracks 23–38 use non-standard 1024-byte sectors, which ordinary DOS copiers
+      couldn't read. Track 39 uses normal 512-byte sectors, and <code>PROTECT.ASM</code>/<code>CHKT39</code> check it.
+      The high-score table is read from and written to track 39, sector 1 (<code>PROCHK.ASM</code>).</li>
+  <li><strong>Moving the picture.</strong> In the original, <kbd>Ctrl</kbd>+<kbd>←</kbd>/<kbd>→</kbd> moved the picture on the monitor
+      by changing the 6845 CRTC's horizontal sync position, for monitors that cut off an edge. Your browser doesn't need that.</li>
+  <li><strong>The shareware build.</strong> With <code>FREEDEMO</code> defined, the game stopped after level 2, didn't save
+      high scores, and added three text screens of instructions, scoring and an order address. This port is the full game.</li>
+  <li><strong>Hyperion support.</strong> <code>DIGGER.H</code> has a build switch for "IBM or Hyperion options". The Hyperion was
+      an early Canadian portable PC compatible.</li>
+</ul>
+</section>
+
+<section id="port">
+<h2>18. About this port</h2>
+<p>The port is about 2,500 lines of dependency-free JavaScript and can be hosted on GitHub Pages as is. Function and variable names
+follow the C source, so the two can be read side by side.</p>
+<ul>
+  <li><code>js/assets.js</code>: sprites, font, title bitmap, level maps, music data and random table, extracted from the original source files by <code>tools/extract.js</code>.</li>
+  <li><code>js/cga.js</code>: an emulated 16 KB CGA framebuffer and a line-by-line port of the <code>GRAPHLIB.ASM</code> sprite engine, including the collision bitmask.</li>
+  <li><code>js/sound.js</code>: <code>TH.C</code> together with an emulated 8253 timer and PC speaker.</li>
+  <li><code>js/game.js</code>: tasks A–Z. The original's blocking busy-waits are rewritten as <code>async</code>/<code>await</code>.</li>
+</ul>
+<p>It differs from the original in a few places:</p>
+<ul>
+  <li>The frame time is fixed rather than counted in CPU loops.</li>
+  <li>The palette flicker while entering initials is shown as a blend of the two palettes.</li>
+  <li>There's no joystick support.</li>
+  <li>High scores are saved in <code>localStorage</code>.</li>
+</ul>
+</section>
+
+</main>
+
+<footer>
+  DIGGER © 1983 Windmill Software Inc. &middot; Browser port and write-up made from the original source code.
+</footer>
+
+<script src="js/assets.js"></script>
+<script src="js/cga.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+<script src="js/docs.js"></script>
+</body>
+</html>
