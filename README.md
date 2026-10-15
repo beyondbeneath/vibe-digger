@@ -2,10 +2,11 @@
 
 **Windmill Software, 1983**, ported from the original C and 8088 assembler sources to plain browser JavaScript.
 
-![Level 1](readme-img/level-1.png)
+## ▶ [Play DIGGER in your browser](https://beyondbeneath.github.io/vibe-digger/)
 
-To play, open `index.html` in a browser, or publish the repository with GitHub Pages
-(Settings → Pages → deploy from the main branch, root folder). There is no build step and there are no dependencies.
+[![Level 1 — click to play](readme-img/level-1.png)](https://beyondbeneath.github.io/vibe-digger/)
+
+You can also play offline by opening `index.html` in a browser. There is no build step and there are no dependencies.
 
 ---
 
