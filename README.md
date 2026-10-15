@@ -628,3 +628,4 @@ node tools/render-docs.js && node tools/render-readme.js
 ---
 
 DIGGER © 1983 Windmill Software Inc. Browser port and write-up made from the original source code.
+Big thanks for [digger.org](https://digger.org/) for the references, code and being the ultimate source of truth for everything Digger.
